@@ -1,0 +1,19 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Brand List</h1>
+
+    {% if object_list %}
+    <ul>
+
+      {% for brand in object_list %}
+      <li>
+        <a href="{{ brand.get_absolute_url }}">{{ brand }}</a> ({{brand.country}})
+      </li>
+      {% endfor %}
+
+    </ul>
+    {% else %}
+      <p>There are no any brands</p>
+    {% endif %} 
+{% endblock %}

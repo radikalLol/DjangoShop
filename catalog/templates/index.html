@@ -1,0 +1,21 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>Online Shop Home</h1>
+
+  <p>Welcome to <em>Online Shop</em>, a very basic Django website developed as a tutorial example on the Mozilla Developer Network.</p>
+
+<h2>Dynamic content</h2>
+
+  <p>The Shop has the following record counts:</p>
+  <ul>
+    <li><strng>Items:</strong> {{ num_products }}</li>
+    <li><strong>Brands:</strong> {{ num_brands }}</li>
+  </ul>
+
+{% endblock %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+<li><a href="{% url 'index' %}">Home</a></li>
