@@ -26,8 +26,8 @@ SECRET_KEY = '^(6q-2w@$f=+6rdghd0eix%jdu#&1dn(k@u0e%&-$t1@#wk_&7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-#DEBUG = True
-DEBUG = False
+DEBUG = True
+#DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 #ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
@@ -43,8 +43,13 @@ INSTALLED_APPS = [
     'catalog.apps.CatalogConfig', 
     'django_countries',
     'djmoney',
-    'cart',
+    'account',
     'whitenoise.runserver_nostatic',
+    'djoser',
+    'rest_framework_simplejwt',
+    'rest_framework',
+    'changeBalance'
+
 ]
 
 MIDDLEWARE = [
@@ -98,8 +103,8 @@ WSGI_APPLICATION = 'MyCoolShop.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'onlineshop',
-        'USER': 'admin',
+        'NAME': 'onlineshop3',
+        'USER': 'admin2',
         'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '5432',
@@ -140,14 +145,32 @@ USE_L10N = True
 
 USE_TZ = True
 
+import datetime
+JWT_AUTH = {
+ 
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3000),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+ 
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-
+from django.urls import reverse_lazy
+AUTH_USER_MODEL = 'account.user'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-LOGIN_REDIRECT_URL = '/'
-CART_SESSION_ID = 'cart'
+LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
+LOGIN_URL = reverse_lazy('login')
+LOGOUT_URL = reverse_lazy('logout')
+#CART_SESSION_ID = 'cart'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+REST_FRAMEWORK = {
+'DEFAULT_AUTHENTICATION_CLASSES': (
+'rest_framework_simplejwt.authentication.JWTAuthentication',
+   )
+}

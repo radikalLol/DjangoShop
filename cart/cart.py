@@ -3,75 +3,94 @@ from django.conf import settings
 from catalog.models import Product
 
 
-class Cart(object):
+class Cart():
+    """
+    A base Basket class, providing some default behaviors that
+    can be inherited or overrided, as necessary.
+    """
 
     def __init__(self, request):
-        """
-        Инициализация корзины
-        """
         self.session = request.session
-        cart = self.session.get(settings.CART_SESSION_ID)
-        if not cart:
-            # сохраняем ПУСТУЮ корзину в сессии
-            cart = self.session[settings.CART_SESSION_ID] = {}
-        self.cart = cart
+        basket = self.session.get(settings.BASKET_SESSION_ID)
+        if settings.BASKET_SESSION_ID not in request.session:
+            basket = self.session[settings.BASKET_SESSION_ID] = {}
+        self.basket = basket
+
+    def add(self, product, qty):
+        """
+        Adding and updating the users basket session data
+        """
+        product_id = str(product.id)
+
+        if product_id in self.basket:
+            self.basket[product_id]['qty'] = qty
+        else:
+            self.basket[product_id] = {'price': str(product.price), 'qty': qty}
+
+        self.save()
 
     def __iter__(self):
         """
-        Перебираем товары в корзине и получаем товары из базы данных.
+        Collect the product_id in the session data to query the database
+        and return products
         """
-        product_ids = self.cart.keys()
-        # получаем товары и добавляем их в корзину
-        products = Product.objects.filter(id__in=product_ids)
+        product_ids = self.basket.keys()
+        products = Product.products.filter(id__in=product_ids)
+        basket = self.basket.copy()
 
-        cart = self.cart.copy()
         for product in products:
-            cart[str(product.id)]['product'] = product
+            basket[str(product.id)]['product'] = product
 
-        for item in cart.values():
+        for item in basket.values():
             item['price'] = Decimal(item['price'])
-            item['total_price'] = item['price'] * item['quantity']
+            item['total_price'] = item['price'] * item['qty']
             yield item
-    
+
     def __len__(self):
         """
-        Считаем сколько товаров в корзине
+        Get the basket data and count the qty of items
         """
-        return sum(item['quantity'] for item in self.cart.values())
+        return sum(item['qty'] for item in self.basket.values())
 
-    def add(self, product, quantity=1, update_quantity=False):
+    def update(self, product, qty):
         """
-        Добавляем товар в корзину или обновляем его количество.
+        Update values in session data
         """
-        product_id = str(product.id)
-        if product_id not in self.cart:
-            self.cart[product_id] = {'quantity': 0,
-                                      'price': str(product.price)}
-        if update_quantity:
-            self.cart[product_id]['quantity'] = quantity
+        product_id = str(product)
+        if product_id in self.basket:
+            self.basket[product_id]['qty'] = qty
+        self.save()
+
+    def get_subtotal_price(self):
+        return sum(Decimal(item['price']) * item['qty'] for item in self.basket.values())
+
+    def get_total_price(self):
+
+        subtotal = sum(Decimal(item['price']) * item['qty'] for item in self.basket.values())
+
+        if subtotal == 0:
+            shipping = Decimal(0.00)
         else:
-            self.cart[product_id]['quantity'] += quantity
+            shipping = Decimal(11.50)
+
+        total = subtotal + Decimal(shipping)
+        return total
+
+    def delete(self, product):
+        """
+        Delete item from session data
+        """
+        product_id = str(product)
+
+        if product_id in self.basket:
+            del self.basket[product_id]
+            self.save()
+
+    def clear(self):
+        # Remove basket from session
+        del self.session[settings.BASKET_SESSION_ID]
         self.save()
 
     def save(self):
-        # сохраняем товар
         self.session.modified = True
-
-    def remove(self, product):
-        """
-        Удаляем товар
-        """
-        product_id = str(product.id)
-        if product_id in self.cart:
-            del self.cart[product_id]
-            self.save()
-
-    def get_total_price(self):
-        # получаем общую стоимость
-        return sum(Decimal(item['price']) * item['quantity'] for item in self.cart.values())
-
-    def clear(self):
-        # очищаем корзину в сессии
-        del self.session[settings.CART_SESSION_ID]
-        self.save()
 

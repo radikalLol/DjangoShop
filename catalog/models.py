@@ -2,6 +2,8 @@ from django.db import models
 
 
 # Create your models here.
+
+
 class Category(models.Model):
     """
     Model representing a book genre (e.g. Science Fiction, Non Fiction).
@@ -53,8 +55,7 @@ class Product(models.Model):
     stock = models.PositiveIntegerField(default=1)
     available = models.BooleanField(default=True)
     slug = models.SlugField(max_length=200, db_index=True, default='')
-    # ManyToManyField used because genre can contain many books. Books can cover many genres.
-    # Genre class has already been defined so we can specify the object above.
+
     
     class Meta:
         ordering = ('title',)

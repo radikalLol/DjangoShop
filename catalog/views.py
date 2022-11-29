@@ -4,62 +4,47 @@ from django.shortcuts import render, get_object_or_404
 
 from .models import Product, Brand, Category
 
-def index(request):
-    """
-    Функция отображения для домашней страницы сайта.
-    """
-    # Генерация "количеств" некоторых главных объектов
-    num_products=Product.objects.all().count()
-    num_brands=Brand.objects.count()  # Метод 'all()' применён по умолчанию.
-
-    # Отрисовка HTML-шаблона index.html с данными внутри
-    # переменной контекста context
-    return render(
-        request,
-        'index.html',
-        context={'num_products':num_products,'num_brands':num_brands},
-    )
-
-                   
-def product_detail(request, id, slug):
-    product = get_object_or_404(Product,
-                                id=id,
-                                slug=slug,
-                                available=True)
-    return render(request,
-                  'catalog/templates/product_detail.html',
-                  {'product': product})
-                  
-                  
-from django.views import generic
-
-class ProductListView(generic.ListView):
-    model = Product
-    
-class ProductDetailView(generic.DetailView):
-    model = Product
-    def get_object(self, queryset=None):
-        return Product.objects.get(id=self.kwargs.get("id"))
-    
-class BrandListView(generic.ListView):
-    model = Brand
-    
-class BrandDetailView(generic.DetailView):
-    model = Brand
-    
-    
-from cart.form import CartAddProductForm
+from .cart import cart
 
 
-def product_detail(request, id, slug):
-    product = get_object_or_404(Product,
-                                id=id,
-                                slug=slug,
-                                available=True)
-    cart_product_form = CartAddProductForm()
-    return render(request, 'catalog/product_detail.html', {'product': product,
-                                                        'cart_product_form': cart_product_form})
-    
-    
+def basket_summary(request):
+    basket = cart(request)
+    return render(request, 'basket/summary.html', {'basket': basket})
 
-    
+
+def basket_add(request):
+    basket = cart(request)
+    if request.POST.get('action') == 'post':
+        product_id = int(request.POST.get('productid'))
+        product_qty = int(request.POST.get('productqty'))
+        product = get_object_or_404(Product, id=product_id)
+        basket.add(product=product, qty=product_qty)
+
+        basketqty = basket.__len__()
+        response = JsonResponse({'qty': basketqty})
+        return response
+
+
+def basket_delete(request):
+    basket = cart(request)
+    if request.POST.get('action') == 'post':
+        product_id = int(request.POST.get('productid'))
+        basket.delete(product=product_id)
+
+        basketqty = basket.__len__()
+        baskettotal = basket.get_total_price()
+        response = JsonResponse({'qty': basketqty, 'subtotal': baskettotal})
+        return response
+
+
+def basket_update(request):
+    basket = cart(request)
+    if request.POST.get('action') == 'post':
+        product_id = int(request.POST.get('productid'))
+        product_qty = int(request.POST.get('productqty'))
+        basket.update(product=product_id, qty=product_qty)
+
+        basketqty = basket.__len__()
+        basketsubtotal = basket.get_subtotal_price()
+        response = JsonResponse({'qty': basketqty, 'subtotal': basketsubtotal})
+        return response

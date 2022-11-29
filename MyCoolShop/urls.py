@@ -16,14 +16,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import include
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+   path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
 urlpatterns += [
-    path('cart/', include('cart.urls', namespace='cart')),
+    #path('cart/', include('cart.urls', namespace='cart')),
     path('catalog/', include('catalog.urls')),
 ]
 
@@ -38,7 +41,7 @@ from django.conf.urls.static import static
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += [
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('account/', include('account.urls')),
 ]
 
 if settings.DEBUG:

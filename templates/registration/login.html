@@ -1,7 +1,8 @@
 {% extends "base_generic.html" %}
-
+{% load static %}
 {% block content %}
 
+<article class = "grid">
 {% if form.errors %}
   <p>Your username and password didn't match. Please try again.</p>
 {% endif %}
@@ -15,26 +16,23 @@
   {% endif %}
 {% endif %}
 
-<form method="post" action="{% url 'login' %}">
+<form method="post" action="{% url 'login' %}" method = "post">
 {% csrf_token %}
-<table>
-
-<tr>
-  <td>{{ form.username.label_tag }}</td>
-  <td>{{ form.username }}</td>
-</tr>
-
-<tr>
-  <td>{{ form.password.label_tag }}</td>
-  <td>{{ form.password }}</td>
-</tr>
-</table>
-
-<input type="submit" value="login" />
-<input type="hidden" name="next" value="{{ next }}" />
+{% for field in form %}
+          <label for="{{ field.auto_id }}">
+            {{ field.label }}
+            {{ field }}
+            {% if field.errors %}
+              <div>{{ field.errors }}</div>
+            {% endif %}
+          </label>
+        {% endfor %}
+        <button type="submit">Login</button>
+        <input type="hidden" name="next" value="{{ next }}" />
+        <p><a href="{% url "password_reset" %}">Forgotten your password?</a></p>
 </form>
-
-{# Assumes you setup the password_reset view in your URLconf #}
-<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
-
+<div>
+      <img src="{% static "images/kotik.jpg" %}">
+    </div>
+</article>
 {% endblock %}

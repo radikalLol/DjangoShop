@@ -3,3 +3,10 @@ django_countries
 django-money
 psycopg2-binary==2.8.6
 Pillow
+dj-database-url==0.4.2
+whitenoise
+wheel==0.37.1
+djoser
+djangorestframework
+djangorestframework_simplejwt
+cryptography==3.3.2

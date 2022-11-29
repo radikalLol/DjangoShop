@@ -1,56 +1,68 @@
+{% load i18n %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 
-  {% block title %}<title>Online Shop</title>{% endblock %}
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <link rel="stylesheet" href="{% static "css/pico.min.css" %}">
+ <link rel="stylesheet" href="{% static "css/styles.css" %}">
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Online Shop</title>
+  {% block header %}
+  {% endblock %}
   <!-- Добавление дополнительного статического CSS файла -->
-{% load static %}
-<link href="{% static 'css/styles.css' %}" rel="stylesheet">
 </head>
-
 <body>
 
-  <div class="container-fluid">
 
-    <div class="row">
-      <div class="col-sm-2">
+  <div class="row">
+  <!--<nav class="navbar navbar-expand-lg">-->
+    <div class="col-sm-2">
       {% block sidebar %}
-      <ul class="sidebar-nav">
+      <!--<div class="collapse navbar-collapse" id="navbarNavAltMarkup">-->
+       <ul class = sidebar-nav">
+          <li><a href="{% url 'index' %}">Home</a></li>
           <li><a href="{% url 'products' %}">All products</a></li>
           <li><a href="{% url 'brands' %}">All brands</a></li>
-          {% if user.is_authenticated %}
-            <li>User: {{ user.get_username }}</li>
-            <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>          {% else %}
-            <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>
-          {% endif %} 
-      </ul>
+          {% if request.user.is_authenticated %}
+          <ul class="menu">
+          <li {% if section == "dashboard" %}class="selected"{% endif %}>
+          <a href="{% url "dashboard" %}">My dashboard</a>
+              </li>
+          <li {% if section == "images" %}class="selected"{% endif %}>
+          <a href="#">Images</a>
+              </li>
+          <li {% if section == "people" %}class="selected"{% endif %}>
+          <a href="#">People</a>
+              </li>
+             </ul>
+         {% endif %}
+         <span class="user">
+           {% if request.user.is_authenticated %}
+             Hello {{ request.user.first_name }},
+             <a href="{% url "logout" %}">Logout</a>
+          {% else %}
+            <a href="{% url "login" %}">Log-in</a>
+          {% endif %}
+         </span>
+     </ul>
+ 
      {% endblock %}
-      </div>
-    <div id="subheader">
-          <div class="cart">
-              {% with total_items=cart|length %}
-              {% if cart|length > 0 %}
-              In your cart:
-              <a href="{% url 'cart:cart_detail' %}">
-              {{ total_items }} items, ${{ cart.get_total_price }}
-              </a>
-              {% else %}
-              Your cart is empty.
-              {% endif %}
-              {% endwith %}
-          </div>
     </div>
-  <div class="col-sm-10 ">
-      {% block content %}{% endblock %}
-  </div>
-</div>
-</div>
+      <main class="col-sm-10 ">
+      {% block content %}{% endblock %}</main>
+ </div>
+ {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li class="{{ message.tags }}">
+                {{ message|safe }}
+                <a href="#" class="close">✖</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
 </body>
 </html>

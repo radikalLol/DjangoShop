@@ -13,7 +13,6 @@ class BrandAdmin(admin.ModelAdmin):
     list_filter = ('name', 'country')
 
 #admin.site.register(Brand, BrandAdmin)
-
 admin.site.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'display_brand', 'price', 'display_category', 'stock', 'available')

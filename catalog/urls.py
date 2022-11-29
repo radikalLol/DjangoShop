@@ -2,12 +2,11 @@ from django.urls import path, re_path, include
 from . import views
 
 #app_name = 'catalog'
+app_name = 'cart'
+
 urlpatterns = [
-    #path('', views.index, name='index'),
-    path('products/', views.ProductListView.as_view(), name='products'),
-    path('product/<int:id>', views.ProductDetailView.as_view(), name='item-detail'),
-    path('brands/', views.BrandListView.as_view(), name='brands'),
-    path('brand/<int:id>', views.BrandDetailView.as_view(), name='brand-detail'),
-
+    path('', views.basket_summary, name='basket_summary'),
+    path('add/', views.basket_add, name='basket_add'),
+    path('delete/', views.basket_delete, name='basket_delete'),
+    path('update/', views.basket_update, name='basket_update'),
 ]
-
